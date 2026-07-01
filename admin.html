@@ -24,6 +24,23 @@
   .v-table .val{font-size:clamp(18px,2.4vw,27px);line-height:1.6}
   .v-table .val s{opacity:.55}
   .v-table .hot{color:#ff7a70;font-weight:700}
+  .v-cmp{width:min(680px,94vw);margin:1.7em auto 0;display:grid;gap:0;color:#fff;text-shadow:none;text-align:center;background:rgba(18,18,20,.42);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.16);border-radius:18px;overflow:hidden;box-shadow:0 14px 44px rgba(0,0,0,.34)}
+  .v-cmp>div{padding:13px 8px;display:flex;align-items:center;justify-content:center;font-size:clamp(14px,1.9vw,20px);line-height:1.35}
+  .v-cmp .rl{justify-content:flex-start;text-align:left;padding-left:16px;font-weight:700;opacity:.9;font-size:clamp(12px,1.5vw,15px)}
+  .v-cmp .ch{padding:16px 6px 14px}
+  .v-cmp .sep{border-top:1px dashed rgba(255,255,255,.16)}
+  .v-cmp .hl{background:rgba(255,255,255,.10)}
+  .v-cmp .cell.hl{font-weight:800}
+  .v-cmp .hltop{border-top-left-radius:14px;border-top-right-radius:14px}
+  .v-cmp .hlbot{border-bottom-left-radius:14px;border-bottom-right-radius:14px}
+  .v-cmp .pill{display:inline-block;padding:.34em .9em;border-radius:999px;font-size:clamp(11px,1.4vw,14px);font-weight:700;background:rgba(255,255,255,.18)}
+  .v-cmp .pill.on{background:var(--accent,#ffcf6b);color:#141414}
+  .v-cmp .hot{color:#ff7a70;font-weight:800}
+  .v-cmp .mk{font-size:clamp(24px,3.6vw,36px);font-weight:700;line-height:1}
+  .v-cmp .mk.ok{color:var(--accent,#ffcf6b)}
+  .v-cmp .mk.ng{color:rgba(255,255,255,.35)}
+  .trow .qk{flex:none;width:32px;border:0;background:#e8e8ed;border-radius:6px;cursor:pointer;font-size:16px}
+  .trow .qk:hover{background:#dcdce1}
   /* テーブル編集UI */
   .trow{display:flex;gap:6px;margin-bottom:6px}
   .trow input{margin-bottom:0!important}
@@ -40,13 +57,13 @@
   .v-eyebrow{font-size:clamp(13px,1.5vw,19px);font-weight:600;letter-spacing:.03em;color:var(--accent,#ffcf6b);margin-bottom:.85em}
   .v-title{font-size:clamp(34px,8.2vw,88px);line-height:1.09;font-weight:700;letter-spacing:-.012em}
   .v-body{font-size:clamp(17px,2.2vw,25px);line-height:1.7;font-weight:500;margin-top:1.15em;max-width:30em;opacity:.94}
-  .v-sec .v-eyebrow,.v-sec .v-title,.v-sec .v-body,.v-sec .v-table,.v-sec .v-cta{opacity:0;transform:translateY(34px);filter:blur(7px);will-change:opacity,transform,filter;transition:opacity 1s cubic-bezier(.16,.8,.3,1),transform 1s cubic-bezier(.16,.8,.3,1),filter 1s ease}
+  .v-sec .v-eyebrow,.v-sec .v-title,.v-sec .v-body,.v-sec .v-table,.v-sec .v-cmp,.v-sec .v-cta{opacity:0;transform:translateY(34px);filter:blur(7px);will-change:opacity,transform,filter;transition:opacity 1s cubic-bezier(.16,.8,.3,1),transform 1s cubic-bezier(.16,.8,.3,1),filter 1s ease}
   .v-sec.in .v-eyebrow{opacity:1;transform:none;filter:none}
   .v-sec.in .v-title{opacity:1;transform:none;filter:none;transition-delay:.09s}
   .v-sec.in .v-body{opacity:1;transform:none;filter:none;transition-delay:.2s}
-  .v-sec.in .v-table{opacity:1;transform:none;filter:none;transition-delay:.26s}
+  .v-sec.in .v-table,.v-sec.in .v-cmp{opacity:1;transform:none;filter:none;transition-delay:.26s}
   .v-sec.in .v-cta{opacity:1;transform:none;filter:none;transition-delay:.34s}
-  @media (prefers-reduced-motion:reduce){.v-sec .v-eyebrow,.v-sec .v-title,.v-sec .v-body,.v-sec .v-table,.v-sec .v-cta{opacity:1;transform:none;filter:none;transition:none}.v-slide{transition-duration:.3s}.v-slide img{animation:none}}
+  @media (prefers-reduced-motion:reduce){.v-sec .v-eyebrow,.v-sec .v-title,.v-sec .v-body,.v-sec .v-table,.v-sec .v-cmp,.v-sec .v-cta{opacity:1;transform:none;filter:none;transition:none}.v-slide{transition-duration:.3s}.v-slide img{animation:none}}
 
   /* ログイン画面 */
   #login{position:fixed;inset:0;z-index:100;background:#0b0b0d;display:flex;align-items:center;justify-content:center;color:#fff}
@@ -99,7 +116,7 @@
     <div class="card">
       <h1>管理画面ログイン</h1>
       <p>編集できるのは登録された管理者のみです。</p>
-      <input id="email" type="email" placeholder="メールアドレス" autocomplete="username">
+      <input id="email" type="email" placeholder="メールアドレス" autocomplete="username" value="jam@eightbeat.co.jp">
       <input id="password" type="password" placeholder="パスワード" autocomplete="current-password">
       <button id="loginBtn">ログイン</button>
       <div class="err" id="loginErr"></div>
@@ -196,6 +213,23 @@ function renderViewer(state, root){
         return '<div class="row"><div class="k">'+esc(r.label)+'</div><div class="val">'+v+'</div></div>';
       }).join('');
       h+='<div class="v-table">'+rows+'</div>';
+    }
+    if(sec.compare&&sec.compare.columns&&sec.compare.columns.length){
+      var cc=sec.compare.columns,rr2=sec.compare.rows||[],n=cc.length,ch='';
+      ch+='<div class="ch corner"></div>';
+      cc.forEach(function(c){ch+='<div class="ch'+(c.hl?' hl hltop':'')+'"><span class="pill'+(c.hl?' on':'')+'">'+esc(c.label)+'</span></div>';});
+      rr2.forEach(function(row,ri){
+        var last=ri===rr2.length-1;
+        ch+='<div class="rl sep">'+esc(row.label)+'</div>';
+        for(var ci=0;ci<n;ci++){
+          var val=(row.values&&row.values[ci])||'';var hl=cc[ci].hl;var rawv=String(val).trim();var vv;
+          if(/^[○〇◯]$/.test(rawv))vv='<span class="mk ok">○</span>';
+          else if(/^[×✕✗Xx]$/.test(rawv))vv='<span class="mk ng">×</span>';
+          else vv=esc(val).replace(/\n/g,'<br>').replace(/\*([^*]+)\*/g,'<span class="hot">$1</span>');
+          ch+='<div class="cell sep'+(hl?' hl':'')+(hl&&last?' hlbot':'')+'">'+vv+'</div>';
+        }
+      });
+      h+='<div class="v-cmp" style="grid-template-columns:1.2fr repeat('+n+',1fr)">'+ch+'</div>';
     }
     if(sec.link&&sec.link.url)h+='<a class="v-cta" href="'+esc(sec.link.url)+'" target="_blank" rel="noopener">'+esc(sec.link.text||'詳しく見る')+'</a>';
     s.innerHTML=h;main.appendChild(s);
@@ -327,6 +361,53 @@ function renderTableRows(box,i){
     box.appendChild(row);
   });
 }
+function renderCompareEditor(box,i){
+  box.innerHTML='';
+  const cmp=STATE.sections[i].compare;
+  if(!cmp){
+    const add=document.createElement('button');add.className='mini';add.style.cssText='width:auto;padding:0 10px';add.textContent='＋比較表を追加';
+    add.onclick=function(){STATE.sections[i].compare={columns:[{label:'JAM MUSIC',hl:true},{label:'一般的な教室',hl:false}],rows:[{label:'項目',values:['','']}]};patchSection(i);renderCompareEditor(box,i);saveDeb();};
+    box.appendChild(add);return;
+  }
+  const cl=document.createElement('p');cl.className='cap';cl.textContent='列（推しにチェック）';box.appendChild(cl);
+  cmp.columns.forEach((c,ci)=>{
+    const row=document.createElement('div');row.className='trow';
+    row.innerHTML='<input class="v" placeholder="列名" value="'+attr(c.label)+'"><label style="display:flex;align-items:center;gap:4px;font-size:12px;white-space:nowrap"><input type="checkbox" '+(c.hl?'checked':'')+'>推し</label><button class="x">✕</button>';
+    const ins=row.querySelectorAll('input');
+    ins[0].oninput=function(){cmp.columns[ci].label=this.value;patchSection(i);saveDeb();};
+    ins[1].onchange=function(){const on=this.checked;cmp.columns.forEach(x=>x.hl=false);cmp.columns[ci].hl=on;patchSection(i);renderCompareEditor(box,i);saveDeb();};
+    row.querySelector('.x').onclick=function(){if(cmp.columns.length<=1)return;cmp.columns.splice(ci,1);cmp.rows.forEach(rr=>rr.values.splice(ci,1));patchSection(i);renderCompareEditor(box,i);saveNow();};
+    box.appendChild(row);
+  });
+  const addcol=document.createElement('button');addcol.className='mini';addcol.style.cssText='width:auto;padding:0 10px;margin-bottom:10px';addcol.textContent='＋列';
+  addcol.onclick=function(){cmp.columns.push({label:'',hl:false});cmp.rows.forEach(rr=>rr.values.push(''));patchSection(i);renderCompareEditor(box,i);saveDeb();};
+  box.appendChild(addcol);
+  const rl=document.createElement('p');rl.className='cap';rl.textContent='行（項目と、各列の値）　値で *文字* は強調';box.appendChild(rl);
+  cmp.rows.forEach((r,ri)=>{
+    const wrap=document.createElement('div');wrap.style.cssText='border:1px solid #ececf0;border-radius:8px;padding:8px;margin-bottom:8px';
+    const head=document.createElement('div');head.className='trow';
+    head.innerHTML='<input class="v" placeholder="項目名" value="'+attr(r.label)+'"><button class="x">✕</button>';
+    head.querySelector('input').oninput=function(){cmp.rows[ri].label=this.value;patchSection(i);saveDeb();};
+    head.querySelector('.x').onclick=function(){cmp.rows.splice(ri,1);patchSection(i);renderCompareEditor(box,i);saveNow();};
+    wrap.appendChild(head);
+    cmp.columns.forEach((c,ci)=>{
+      const vr=document.createElement('div');vr.className='trow';
+      vr.innerHTML='<span style="flex:none;width:34%;font-size:11px;color:#86868b;display:flex;align-items:center">'+esc(c.label||('列'+(ci+1)))+'</span><textarea class="v" rows="1" placeholder="値">'+esc((r.values&&r.values[ci])||'')+'</textarea><button type="button" class="qk" data-o>○</button><button type="button" class="qk" data-x>×</button>';
+      const ta=vr.querySelector('textarea');
+      ta.oninput=function(){cmp.rows[ri].values=cmp.rows[ri].values||[];cmp.rows[ri].values[ci]=this.value;patchSection(i);saveDeb();};
+      vr.querySelector('[data-o]').onclick=function(){ta.value='○';cmp.rows[ri].values=cmp.rows[ri].values||[];cmp.rows[ri].values[ci]='○';patchSection(i);saveDeb();};
+      vr.querySelector('[data-x]').onclick=function(){ta.value='×';cmp.rows[ri].values=cmp.rows[ri].values||[];cmp.rows[ri].values[ci]='×';patchSection(i);saveDeb();};
+      wrap.appendChild(vr);
+    });
+    box.appendChild(wrap);
+  });
+  const addrow=document.createElement('button');addrow.className='mini';addrow.style.cssText='width:auto;padding:0 10px';addrow.textContent='＋行';
+  addrow.onclick=function(){cmp.rows.push({label:'',values:cmp.columns.map(()=>'')});patchSection(i);renderCompareEditor(box,i);saveDeb();};
+  box.appendChild(addrow);
+  const del=document.createElement('button');del.className='mini del';del.style.cssText='width:auto;padding:0 10px;margin-left:6px';del.textContent='比較表を削除';
+  del.onclick=function(){delete STATE.sections[i].compare;patchSection(i);renderCompareEditor(box,i);saveNow();};
+  box.appendChild(del);
+}
 function sectionHTML(sec){
   const e=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   let h='';
@@ -340,6 +421,23 @@ function sectionHTML(sec){
     }).join('');
     h+='<div class="v-table">'+rows+'</div>';
   }
+  if(sec.compare&&sec.compare.columns&&sec.compare.columns.length){
+    var cc=sec.compare.columns,rr2=sec.compare.rows||[],n=cc.length,ch='';
+    ch+='<div class="ch corner"></div>';
+    cc.forEach(function(c){ch+='<div class="ch'+(c.hl?' hl hltop':'')+'"><span class="pill'+(c.hl?' on':'')+'">'+e(c.label)+'</span></div>';});
+    rr2.forEach(function(row,ri){
+      var last=ri===rr2.length-1;
+      ch+='<div class="rl sep">'+e(row.label)+'</div>';
+      for(var ci=0;ci<n;ci++){
+        var val=(row.values&&row.values[ci])||'';var hl=cc[ci].hl;var rawv=String(val).trim();var vv;
+        if(/^[○〇◯]$/.test(rawv))vv='<span class="mk ok">○</span>';
+        else if(/^[×✕✗Xx]$/.test(rawv))vv='<span class="mk ng">×</span>';
+        else vv=e(val).replace(/\n/g,'<br>').replace(/\*([^*]+)\*/g,'<span class="hot">$1</span>');
+        ch+='<div class="cell sep'+(hl?' hl':'')+(hl&&last?' hlbot':'')+'">'+vv+'</div>';
+      }
+    });
+    h+='<div class="v-cmp" style="grid-template-columns:1.2fr repeat('+n+',1fr)">'+ch+'</div>';
+  }
   if(sec.link&&sec.link.url)h+='<a class="v-cta" href="'+e(sec.link.url)+'" target="_blank" rel="noopener">'+e(sec.link.text||'詳しく見る')+'</a>';
   return h;
 }
@@ -347,7 +445,7 @@ function patchSection(i){
   const secEl=app.querySelectorAll('.v-content .v-sec')[i];
   if(!secEl)return;
   secEl.innerHTML=sectionHTML(STATE.sections[i]);
-  secEl.querySelectorAll('.v-eyebrow,.v-title,.v-body,.v-table,.v-cta').forEach(el=>{el.style.transition='none';el.style.opacity='1';el.style.transform='none';el.style.filter='none';});
+  secEl.querySelectorAll('.v-eyebrow,.v-title,.v-body,.v-table,.v-cmp,.v-cta').forEach(el=>{el.style.transition='none';el.style.opacity='1';el.style.transform='none';el.style.filter='none';});
 }
 function renderSections(){
   const box=document.getElementById('sectionList');box.innerHTML='';
@@ -363,7 +461,9 @@ function renderSections(){
       '<p class="cap">表（任意）　値の中で *文字* は強調（赤）、~文字~ は取り消し線、改行で複数行</p>'+
       '<div data-trows></div>'+
       '<button class="mini" data-addrow style="width:auto;padding:0 10px">＋行</button>'+
-      (sec.table&&sec.table.length?' <button class="mini del" data-deltable style="width:auto;padding:0 10px">表を削除</button>':'');
+      (sec.table&&sec.table.length?' <button class="mini del" data-deltable style="width:auto;padding:0 10px">表を削除</button>':'')+
+      '<p class="cap">比較表（任意）　列で比較・推しの列をハイライト</p>'+
+      '<div data-cmp></div>';
     el.querySelector('[data-eyebrow]').oninput=function(){STATE.sections[i].eyebrow=this.value;patchSection(i);saveDeb();};
     el.querySelector('[data-title]').oninput=function(){STATE.sections[i].title=this.value;patchSection(i);saveDeb();};
     el.querySelector('[data-body]').oninput=function(){STATE.sections[i].body=this.value;patchSection(i);saveDeb();};
@@ -372,6 +472,7 @@ function renderSections(){
     renderTableRows(el.querySelector('[data-trows]'),i);
     el.querySelector('[data-addrow]').onclick=function(){STATE.sections[i].table=STATE.sections[i].table||[];STATE.sections[i].table.push({label:'',value:''});patchSection(i);renderSections();saveDeb();};
     var dtb=el.querySelector('[data-deltable]');if(dtb)dtb.onclick=function(){delete STATE.sections[i].table;patchSection(i);renderSections();saveNow();};
+    renderCompareEditor(el.querySelector('[data-cmp]'),i);
     el.querySelector('[data-up]').onclick=async()=>{if(i>0){swap(STATE.sections,i,i-1);await saveNow();draw();renderSections();}};
     el.querySelector('[data-dn]').onclick=async()=>{if(i<STATE.sections.length-1){swap(STATE.sections,i,i+1);await saveNow();draw();renderSections();}};
     el.querySelector('[data-del]').onclick=async()=>{STATE.sections.splice(i,1);await saveNow();draw();renderSections();};
