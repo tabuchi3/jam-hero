@@ -12,7 +12,7 @@
   .v-slide{position:absolute;inset:0;opacity:0;transition:opacity var(--fade,1.2s) ease-in-out;will-change:opacity}
   .v-slide.active{opacity:1}
   .v-slide img{width:100%;height:100%;object-fit:cover;display:block;animation:kenburns var(--kb-dur,16s) ease-in-out infinite alternate;will-change:transform}
-  @keyframes kenburns{from{transform:scale(1.03)}to{transform:scale(1.16)}}
+  @keyframes kenburns{from{transform:scale(1.04)}to{transform:scale(1.20)}}
   body.nozoom .v-slide img{animation:none}
   .v-cta{display:inline-block;margin-top:1.7em;padding:.72em 1.6em;border-radius:999px;background:var(--accent,#ffcf6b);color:#141414;font-weight:700;font-size:clamp(14px,1.8vw,18px);text-decoration:none;box-shadow:0 6px 22px rgba(0,0,0,.28)}
   .v-cta:hover{filter:brightness(1.06)}
@@ -72,7 +72,7 @@ function renderViewer(state, root){
   photos.forEach(function(src,i){
     var s=document.createElement('div');s.className='v-slide'+(i===0?' active':'');
     var im=document.createElement('img');im.src=src;im.alt='';
-    im.style.setProperty('--kb-dur',(12+Math.random()*10).toFixed(1)+'s');
+    im.style.setProperty('--kb-dur',(10+Math.random()*8).toFixed(1)+'s');
     im.style.transformOrigin=(20+Math.random()*60).toFixed(0)+'% '+(20+Math.random()*60).toFixed(0)+'%';
     im.style.animationDirection=Math.random()<0.5?'alternate':'alternate-reverse';
     im.style.animationDelay=(-Math.random()*8).toFixed(1)+'s';
