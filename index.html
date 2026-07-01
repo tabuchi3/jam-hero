@@ -11,7 +11,11 @@
   .v-bg{position:fixed;inset:0;z-index:0}
   .v-slide{position:absolute;inset:0;opacity:0;transition:opacity var(--fade,1.2s) ease-in-out;will-change:opacity}
   .v-slide.active{opacity:1}
-  .v-slide img{width:100%;height:100%;object-fit:cover;display:block}
+  .v-slide img{width:100%;height:100%;object-fit:cover;display:block;animation:kenburns var(--kb-dur,16s) ease-in-out infinite alternate;will-change:transform}
+  @keyframes kenburns{from{transform:scale(1.03)}to{transform:scale(1.16)}}
+  body.nozoom .v-slide img{animation:none}
+  .v-cta{display:inline-block;margin-top:1.7em;padding:.72em 1.6em;border-radius:999px;background:var(--accent,#ffcf6b);color:#141414;font-weight:700;font-size:clamp(14px,1.8vw,18px);text-decoration:none;box-shadow:0 6px 22px rgba(0,0,0,.28)}
+  .v-cta:hover{filter:brightness(1.06)}
   .v-scrim{position:fixed;inset:0;z-index:1;pointer-events:none;
     background:linear-gradient(180deg,rgba(0,0,0,calc(var(--scrim,.45)*.7)) 0%,rgba(0,0,0,var(--scrim,.45)) 45%,rgba(0,0,0,calc(var(--scrim,.45)*.85)) 100%)}
   .v-content{position:relative;z-index:2;color:var(--ink,#fff);text-shadow:0 2px 26px rgba(0,0,0,.32)}
@@ -20,15 +24,16 @@
   .v-eyebrow{font-size:clamp(13px,1.5vw,19px);font-weight:600;letter-spacing:.03em;color:var(--accent,#ffcf6b);margin-bottom:.85em}
   .v-title{font-size:clamp(34px,8.2vw,88px);line-height:1.09;font-weight:700;letter-spacing:-.012em}
   .v-body{font-size:clamp(17px,2.2vw,25px);line-height:1.7;font-weight:500;margin-top:1.15em;max-width:30em;opacity:.94}
-  .v-sec .v-eyebrow,.v-sec .v-title,.v-sec .v-body{
+  .v-sec .v-eyebrow,.v-sec .v-title,.v-sec .v-body,.v-sec .v-cta{
     opacity:0;transform:translateY(34px);filter:blur(7px);will-change:opacity,transform,filter;
     transition:opacity 1s cubic-bezier(.16,.8,.3,1),transform 1s cubic-bezier(.16,.8,.3,1),filter 1s ease}
   .v-sec.in .v-eyebrow{opacity:1;transform:none;filter:none}
   .v-sec.in .v-title{opacity:1;transform:none;filter:none;transition-delay:.09s}
   .v-sec.in .v-body{opacity:1;transform:none;filter:none;transition-delay:.2s}
+  .v-sec.in .v-cta{opacity:1;transform:none;filter:none;transition-delay:.3s}
   @media (prefers-reduced-motion:reduce){
-    .v-sec .v-eyebrow,.v-sec .v-title,.v-sec .v-body{opacity:1;transform:none;filter:none;transition:none}
-    .v-slide{transition-duration:.3s}}
+    .v-sec .v-eyebrow,.v-sec .v-title,.v-sec .v-body,.v-sec .v-cta{opacity:1;transform:none;filter:none;transition:none}
+    .v-slide{transition-duration:.3s}.v-slide img{animation:none}}
 </style>
 </head>
 <body>
@@ -52,11 +57,17 @@ function renderViewer(state, root){
   r.setProperty('--scrim',(state.scrim==null?0.45:state.scrim));
   r.setProperty('--accent',state.accent||'#ffcf6b');
   document.body.style.setProperty('--ink',state.dark?'#111':'#fff');
+  document.body.classList.toggle('nozoom',state.zoom===false);
   var bg=document.createElement('div');bg.className='v-bg';
   var photos=state.photos||[];
   photos.forEach(function(src,i){
     var s=document.createElement('div');s.className='v-slide'+(i===0?' active':'');
-    var im=document.createElement('img');im.src=src;im.alt='';s.appendChild(im);bg.appendChild(s);
+    var im=document.createElement('img');im.src=src;im.alt='';
+    im.style.setProperty('--kb-dur',(12+Math.random()*10).toFixed(1)+'s');
+    im.style.transformOrigin=(20+Math.random()*60).toFixed(0)+'% '+(20+Math.random()*60).toFixed(0)+'%';
+    im.style.animationDirection=Math.random()<0.5?'alternate':'alternate-reverse';
+    im.style.animationDelay=(-Math.random()*8).toFixed(1)+'s';
+    s.appendChild(im);bg.appendChild(s);
   });
   root.appendChild(bg);
   var scrim=document.createElement('div');scrim.className='v-scrim';root.appendChild(scrim);
@@ -67,6 +78,7 @@ function renderViewer(state, root){
     if(sec.eyebrow)h+='<p class="v-eyebrow">'+esc(sec.eyebrow)+'</p>';
     if(sec.title)h+='<h2 class="v-title">'+esc(sec.title).replace(/\n/g,'<br>')+'</h2>';
     if(sec.body)h+='<p class="v-body">'+esc(sec.body).replace(/\n/g,'<br>')+'</p>';
+    if(sec.link&&sec.link.url)h+='<a class="v-cta" href="'+esc(sec.link.url)+'" target="_blank" rel="noopener">'+esc(sec.link.text||'詳しく見る')+'</a>';
     s.innerHTML=h;main.appendChild(s);
   });
   root.appendChild(main);

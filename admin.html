@@ -12,7 +12,11 @@
   .v-bg{position:fixed;inset:0;z-index:0}
   .v-slide{position:absolute;inset:0;opacity:0;transition:opacity var(--fade,1.2s) ease-in-out;will-change:opacity}
   .v-slide.active{opacity:1}
-  .v-slide img{width:100%;height:100%;object-fit:cover;display:block}
+  .v-slide img{width:100%;height:100%;object-fit:cover;display:block;animation:kenburns var(--kb-dur,16s) ease-in-out infinite alternate;will-change:transform}
+  @keyframes kenburns{from{transform:scale(1.03)}to{transform:scale(1.16)}}
+  body.nozoom .v-slide img{animation:none}
+  .v-cta{display:inline-block;margin-top:1.7em;padding:.72em 1.6em;border-radius:999px;background:var(--accent,#ffcf6b);color:#141414;font-weight:700;font-size:clamp(14px,1.8vw,18px);text-decoration:none;box-shadow:0 6px 22px rgba(0,0,0,.28)}
+  .v-cta:hover{filter:brightness(1.06)}
   .v-scrim{position:fixed;inset:0;z-index:1;pointer-events:none;
     background:linear-gradient(180deg,rgba(0,0,0,calc(var(--scrim,.45)*.7)) 0%,rgba(0,0,0,var(--scrim,.45)) 45%,rgba(0,0,0,calc(var(--scrim,.45)*.85)) 100%)}
   .v-content{position:relative;z-index:2;color:var(--ink,#fff);text-shadow:0 2px 26px rgba(0,0,0,.32)}
@@ -20,11 +24,12 @@
   .v-eyebrow{font-size:clamp(13px,1.5vw,19px);font-weight:600;letter-spacing:.03em;color:var(--accent,#ffcf6b);margin-bottom:.85em}
   .v-title{font-size:clamp(34px,8.2vw,88px);line-height:1.09;font-weight:700;letter-spacing:-.012em}
   .v-body{font-size:clamp(17px,2.2vw,25px);line-height:1.7;font-weight:500;margin-top:1.15em;max-width:30em;opacity:.94}
-  .v-sec .v-eyebrow,.v-sec .v-title,.v-sec .v-body{opacity:0;transform:translateY(34px);filter:blur(7px);will-change:opacity,transform,filter;transition:opacity 1s cubic-bezier(.16,.8,.3,1),transform 1s cubic-bezier(.16,.8,.3,1),filter 1s ease}
+  .v-sec .v-eyebrow,.v-sec .v-title,.v-sec .v-body,.v-sec .v-cta{opacity:0;transform:translateY(34px);filter:blur(7px);will-change:opacity,transform,filter;transition:opacity 1s cubic-bezier(.16,.8,.3,1),transform 1s cubic-bezier(.16,.8,.3,1),filter 1s ease}
   .v-sec.in .v-eyebrow{opacity:1;transform:none;filter:none}
   .v-sec.in .v-title{opacity:1;transform:none;filter:none;transition-delay:.09s}
   .v-sec.in .v-body{opacity:1;transform:none;filter:none;transition-delay:.2s}
-  @media (prefers-reduced-motion:reduce){.v-sec .v-eyebrow,.v-sec .v-title,.v-sec .v-body{opacity:1;transform:none;filter:none;transition:none}.v-slide{transition-duration:.3s}}
+  .v-sec.in .v-cta{opacity:1;transform:none;filter:none;transition-delay:.3s}
+  @media (prefers-reduced-motion:reduce){.v-sec .v-eyebrow,.v-sec .v-title,.v-sec .v-body,.v-sec .v-cta{opacity:1;transform:none;filter:none;transition:none}.v-slide{transition-duration:.3s}.v-slide img{animation:none}}
 
   /* ログイン画面 */
   #login{position:fixed;inset:0;z-index:100;background:#0b0b0d;display:flex;align-items:center;justify-content:center;color:#fff}
@@ -111,6 +116,7 @@
       <div class="fld"><label>背景の暗さ <span id="scrimV"></span></label><input type="range" id="scrim" min="0" max="0.85" step="0.05"></div>
       <div class="fld"><label>アクセント色</label><input type="color" id="accent" style="width:100%;height:34px;border:1px solid #dcdce1;border-radius:8px"></div>
       <div class="fld"><label class="sw"><input type="checkbox" id="dark"> 文字を黒にする（明るい写真向け）</label></div>
+      <div class="fld"><label class="sw"><input type="checkbox" id="zoom"> 写真をゆっくり動かす（ズーム）</label></div>
     </div>
     <div class="grp">
       <h2>保存</h2>
@@ -141,11 +147,17 @@ function renderViewer(state, root){
   r.setProperty('--scrim',(state.scrim==null?0.45:state.scrim));
   r.setProperty('--accent',state.accent||'#ffcf6b');
   document.body.style.setProperty('--ink',state.dark?'#111':'#fff');
+  document.body.classList.toggle('nozoom',state.zoom===false);
   var bg=document.createElement('div');bg.className='v-bg';
   var photos=state.photos||[];
   photos.forEach(function(src,i){
     var s=document.createElement('div');s.className='v-slide'+(i===0?' active':'');
-    var im=document.createElement('img');im.src=src;im.alt='';s.appendChild(im);bg.appendChild(s);
+    var im=document.createElement('img');im.src=src;im.alt='';
+    im.style.setProperty('--kb-dur',(12+Math.random()*10).toFixed(1)+'s');
+    im.style.transformOrigin=(20+Math.random()*60).toFixed(0)+'% '+(20+Math.random()*60).toFixed(0)+'%';
+    im.style.animationDirection=Math.random()<0.5?'alternate':'alternate-reverse';
+    im.style.animationDelay=(-Math.random()*8).toFixed(1)+'s';
+    s.appendChild(im);bg.appendChild(s);
   });
   root.appendChild(bg);
   var scrim=document.createElement('div');scrim.className='v-scrim';root.appendChild(scrim);
@@ -156,6 +168,7 @@ function renderViewer(state, root){
     if(sec.eyebrow)h+='<p class="v-eyebrow">'+esc(sec.eyebrow)+'</p>';
     if(sec.title)h+='<h2 class="v-title">'+esc(sec.title).replace(/\n/g,'<br>')+'</h2>';
     if(sec.body)h+='<p class="v-body">'+esc(sec.body).replace(/\n/g,'<br>')+'</p>';
+    if(sec.link&&sec.link.url)h+='<a class="v-cta" href="'+esc(sec.link.url)+'" target="_blank" rel="noopener">'+esc(sec.link.text||'詳しく見る')+'</a>';
     s.innerHTML=h;main.appendChild(s);
   });
   root.appendChild(main);
@@ -276,13 +289,14 @@ function sectionHTML(sec){
   if(sec.eyebrow)h+='<p class="v-eyebrow">'+e(sec.eyebrow)+'</p>';
   if(sec.title)h+='<h2 class="v-title">'+e(sec.title).replace(/\n/g,'<br>')+'</h2>';
   if(sec.body)h+='<p class="v-body">'+e(sec.body).replace(/\n/g,'<br>')+'</p>';
+  if(sec.link&&sec.link.url)h+='<a class="v-cta" href="'+e(sec.link.url)+'" target="_blank" rel="noopener">'+e(sec.link.text||'詳しく見る')+'</a>';
   return h;
 }
 function patchSection(i){
   const secEl=app.querySelectorAll('.v-content .v-sec')[i];
   if(!secEl)return;
   secEl.innerHTML=sectionHTML(STATE.sections[i]);
-  secEl.querySelectorAll('.v-eyebrow,.v-title,.v-body').forEach(el=>{el.style.transition='none';el.style.opacity='1';el.style.transform='none';el.style.filter='none';});
+  secEl.querySelectorAll('.v-eyebrow,.v-title,.v-body,.v-cta').forEach(el=>{el.style.transition='none';el.style.opacity='1';el.style.transform='none';el.style.filter='none';});
 }
 function renderSections(){
   const box=document.getElementById('sectionList');box.innerHTML='';
@@ -292,10 +306,14 @@ function renderSections(){
       '<span class="acts"><button class="mini" data-up>▲</button><button class="mini" data-dn>▼</button><button class="mini del" data-del>✕</button></span></div>'+
       '<p class="cap">ラベル（任意）</p><input data-eyebrow value="'+attr(sec.eyebrow)+'">'+
       '<p class="cap">見出し</p><textarea data-title rows="2">'+esc(sec.title)+'</textarea>'+
-      '<p class="cap">本文（任意）</p><textarea data-body rows="3">'+esc(sec.body)+'</textarea>';
+      '<p class="cap">本文（任意）</p><textarea data-body rows="3">'+esc(sec.body)+'</textarea>'+
+      '<p class="cap">ボタンの文字（任意）</p><input data-linktext value="'+attr((sec.link&&sec.link.text)||'')+'">'+
+      '<p class="cap">ボタンのリンク先URL（任意）</p><input data-linkurl value="'+attr((sec.link&&sec.link.url)||'')+'">';
     el.querySelector('[data-eyebrow]').oninput=function(){STATE.sections[i].eyebrow=this.value;patchSection(i);saveDeb();};
     el.querySelector('[data-title]').oninput=function(){STATE.sections[i].title=this.value;patchSection(i);saveDeb();};
     el.querySelector('[data-body]').oninput=function(){STATE.sections[i].body=this.value;patchSection(i);saveDeb();};
+    el.querySelector('[data-linktext]').oninput=function(){STATE.sections[i].link=STATE.sections[i].link||{};STATE.sections[i].link.text=this.value;patchSection(i);saveDeb();};
+    el.querySelector('[data-linkurl]').oninput=function(){STATE.sections[i].link=STATE.sections[i].link||{};STATE.sections[i].link.url=this.value;patchSection(i);saveDeb();};
     el.querySelector('[data-up]').onclick=async()=>{if(i>0){swap(STATE.sections,i,i-1);await saveNow();draw();renderSections();}};
     el.querySelector('[data-dn]').onclick=async()=>{if(i<STATE.sections.length-1){swap(STATE.sections,i,i+1);await saveNow();draw();renderSections();}};
     el.querySelector('[data-del]').onclick=async()=>{STATE.sections.splice(i,1);await saveNow();draw();renderSections();};
@@ -319,6 +337,8 @@ function buildPanel(){
   ac.oninput=function(){STATE.accent=this.value;document.documentElement.style.setProperty('--accent',this.value);saveDeb();};
   const dk=document.getElementById('dark');dk.checked=!!STATE.dark;
   dk.onchange=function(){STATE.dark=this.checked;document.body.style.setProperty('--ink',this.checked?'#111':'#fff');saveNow();};
+  const zm=document.getElementById('zoom');zm.checked=STATE.zoom!==false;
+  zm.onchange=function(){STATE.zoom=this.checked;document.body.classList.toggle('nozoom',!this.checked);saveNow();};
 }
 </script>
 </body>
